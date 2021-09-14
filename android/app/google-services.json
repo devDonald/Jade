@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "166603333650",
+    "firebase_url": "https://medcare-phdcwo.firebaseio.com",
+    "project_id": "medcare-phdcwo",
+    "storage_bucket": "medcare-phdcwo.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:166603333650:android:641ec5ebc0a616140178cb",
+        "android_client_info": {
+          "package_name": "com.adaeze.medcare"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "166603333650-vhviaoomc5ivq7r99v21born8qi131ri.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.adaeze.medcare",
+            "certificate_hash": "e666dcc3244ef10d55088e8636c6d36df574b992"
+          }
+        },
+        {
+          "client_id": "166603333650-4gjmjtpc7qvtopjacj5rru06bidn4l49.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDncnIhHYXxiXLwnazs0RpMUiaL6DAItao"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "166603333650-4gjmjtpc7qvtopjacj5rru06bidn4l49.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
