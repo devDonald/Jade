@@ -5,8 +5,11 @@ import 'package:medcare/src/auth/login_doctor.dart';
 import 'package:medcare/src/auth/user_login.dart';
 import 'package:medcare/src/doctor/doctor_home.dart';
 import 'package:medcare/src/doctor/list_chats.dart';
+import 'package:medcare/src/screens/about_us.dart';
 import 'package:medcare/src/screens/chat_history.dart';
+import 'package:medcare/src/screens/contact.dart';
 import 'package:medcare/src/screens/jade_chat.dart';
+import 'package:medcare/src/screens/services.dart';
 import 'package:medcare/src/screens/users_home.dart';
 
 import 'src/welcomePage.dart';
@@ -41,6 +44,9 @@ class MyApp extends StatelessWidget {
         '/chat': (context) => JadeChat(),
         '/history': (context) => ChatHistory(),
         '/appointments': (context) => ChatList(),
+        '/about': (context) => AboutUs(),
+        '/services': (context) => Services(),
+        '/contact': (context) => Contact(),
       },
     );
   }

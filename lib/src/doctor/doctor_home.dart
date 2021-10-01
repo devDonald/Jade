@@ -2,13 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:medcare/src/doctor/list_chats.dart';
 import 'package:medcare/src/helpers/auth_service.dart';
 
 final root = FirebaseFirestore.instance;
-final usersRef = root.collection('users');
-final doctorRef = root.collection('doctors');
 final chatFeedRef = root.collection('chatRef');
-final chatRef = root.collection('chats');
+final groupChatRef = root.collection('chats');
 
 final timestamp = DateTime.now().toUtc();
 
@@ -82,7 +81,16 @@ class _DoctorHomeState extends State<DoctorHome> {
                   icon: Icons.message,
                   title: 'Chat Appointments',
                   onTap: () {
-                    Navigator.of(context).pushNamed('/appointments');
+                    //Navigator.of(context).pushNamed('/appointments');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChatList(
+                          doctorId: _uid,
+                        ),
+                        //follow user if not owner
+                      ),
+                    );
                   },
                 ),
                 HomeCard(

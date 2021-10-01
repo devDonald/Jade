@@ -1,216 +1,128 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:medcare/src/doctor/chat_screen.dart';
 import 'package:medcare/src/screens/users_home.dart';
 
+import 'chats/screen_loading.dart';
+import 'doctor_home.dart';
+
 class ChatList extends StatefulWidget {
+  final String doctorId;
+  const ChatList({
+    Key key,
+    this.doctorId,
+  }) : super(key: key);
+
   @override
   _ChatListState createState() => _ChatListState();
 }
 
 class _ChatListState extends State<ChatList> {
-  bool isInAnyGroup = true, isLoading = false;
-
-  String _uid;
-
-  void checkInGroup() async {
-    if (mounted == true) {
-      setState(() {
-        isLoading = true;
-      });
-    }
-    // final prefs = await SharedPreferences.getInstance();
-    //  = prefs.getString('uid');
-    try {
-      User _currentUser = FirebaseAuth.instance.currentUser;
-      String authid = _currentUser.uid;
-
-      root.collection('users').doc(authid).get().then((ds) {
-        if (ds.exists) {
-          if (mounted) {
-            setState(() {
-              isInAnyGroup = ds.data()['inGroup'];
-              _uid = ds.data()['userId'];
-            });
-          }
-        }
-      });
-      if (mounted == true) {
-        setState(() {
-          isLoading = false;
-        });
-      }
-    } catch (e) {
-      print(e.toString());
-    }
-  }
-
-  void seenChat() async {
-    User _currentUser = await FirebaseAuth.instance.currentUser;
-    String authid = _currentUser.uid;
-    var snapshots = chatFeedRef.doc(authid).collection('feedItems').snapshots();
-    try {
-      await snapshots.forEach((snapshot) async {
-        List<DocumentSnapshot> documents = snapshot.docs;
-
-        for (var document in documents) {
-          await document.reference.update(<String, dynamic>{
-            'seen': true,
-          });
-        }
-      });
-    } catch (e) {
-      print(e.toString());
-    }
-  }
+  Stream _stream;
 
   @override
   void initState() {
+    _stream = doctorRef.doc('${widget.doctorId}')
+        .collection('chats')
+        .orderBy('timestamp', descending: true)
+        .snapshots();
+
     super.initState();
-    checkInGroup();
-    seenChat();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading == true) {
-      return Center(child: CircularProgressIndicator());
-    } else {
-      if (!isInAnyGroup) {
-        return buildNoGroupChatContent();
-      } else {
-        return buildGroupChatContent();
-      }
-    }
-  }
-
-  Widget buildNoGroupChatContent() {
-    return Container(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          Text(
-            'Hello Doctor, You have no chat appointments yet, we would notify you when you hava anyone',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 15.0,
-              color: Colors.black,
+    return StreamBuilder<QuerySnapshot>(
+      stream: _stream,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return ScreenLoading();
+        } else if (!snapshot.hasData) {
+          return Container(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  'You currently do not have any appointment chats available',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 15.0,
+                    color: Colors.black,
+                  ),
+                ),
+                SizedBox(height: 15.0),
+              ],
             ),
-          ),
-          SizedBox(height: 15.0),
-        ],
-      ),
-    );
-  }
+          );
+        } else if (snapshot.hasData) {
+          return ListView.builder(
+            physics: BouncingScrollPhysics(),
+            shrinkWrap: true,
+            itemCount: snapshot.data.docs.length,
+            itemBuilder: (BuildContext context, int index) {
+              DocumentSnapshot snap = snapshot.data.docs[index];
 
-  Widget buildGroupChatContent() {
-    return Container(
-      child: StreamBuilder<QuerySnapshot>(
-          stream: usersRef
-              .doc(_uid)
-              .collection('groups')
-              .orderBy('timestamp', descending: true)
-              .snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
-                child: Text("Loading..."),
-              );
-            } else if (!snapshot.hasData) {
-              return Center(
-                child: Text("No Groups Yet..."),
-              );
-            }
-            return ListView.builder(
-                physics: BouncingScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: snapshot.data.docs.length,
-                itemBuilder: (BuildContext context, int index) {
-                  DocumentSnapshot snap = snapshot.data.docs[index];
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(
-                      child: Text("Loading..."),
-                    );
-                  } else if (!snapshot.hasData) {
-                    return Center(
-                      child: Text("loading..."),
-                    );
+              return StreamBuilder(
+                stream: chatRef
+                    .doc('${widget.doctorId}')
+                    .collection('chats')
+                    .where('groupId', isEqualTo: snap['groupId'])
+                    .where('seen', isEqualTo: false)
+                    .snapshots(),
+                builder: (context, sna) {
+                  int unreadCount = 0;
+
+                  print('im through second stream');
+                  print('nope');
+                  QuerySnapshot querySnap = sna.data;
+                  if (sna.hasData) {
+                    unreadCount = querySnap.docs.length;
                   }
-                  // return DisplayGroups(
-                  //   groupName: snap['groupName'],
-                  //   lastChat: snap['latestChat'] ?? '',
-                  //   time: snap['time'] ?? '',
-                  //   chatCount: 0,
-                  //   onTap: () {
-                  //     Navigator.push(
-                  //         context,
-                  //         MaterialPageRoute(
-                  //           builder: (context) => GroupChat(
-                  //             groupId: snap['groupId'],
-                  //             groupName: snap['groupName'],
-                  //           ),
-                  //         ));
-                  //   },
-                  // );
-                  return StreamBuilder(
-                    stream: doctorRef
-                        .doc(_uid)
-                        .collection('groups')
-                        .doc(snap['groupId'])
-                        .collection('chats')
-                        .where('seen', isEqualTo: false)
-                        .snapshots(),
-                    builder: (context, sna) {
-                      int unreadCount = 0;
 
-                      print('im through second stream');
-                      print('nope');
-                      QuerySnapshot querySnap = sna.data;
-                      if (sna.hasData) {
-                        unreadCount = querySnap.docs.length;
-                      }
-
-                      print('unread $unreadCount');
-                      return DisplayGroups(
-                        groupName: snap['groupName'],
-                        lastChat: snap['latestChat'] ?? '',
-                        time: snap['time'] ?? '',
-                        timestamp: snap['timestamp'],
-                        chatCount: unreadCount,
-                        onTap: () {
-                          // Navigator.push(
-                          //     context,
-                          //     MaterialPageRoute(
-                          //       builder: (context) => ChatPage(
-                          //         groupId: snap['groupId'],
-                          //         groupName: snap['groupName'],
-                          //       ),
-                          //     ));
-                        },
-                      );
+                  return DisplayGroups(
+                    username: snap['username'],
+                    lastChat: snap['latestChat'] ?? '',
+                    time: snap['time'] ?? '',
+                    chatCount: unreadCount,
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChatScreen(
+                              chatId: snap['groupId'],
+                              username: snap['groupName'],
+                              userId: '',
+                              receiverId: snap['groupIcon'],
+                              receiverName: snap['adminId'],
+                            ),
+                          ));
                     },
                   );
-                });
-          }),
+                },
+              );
+            },
+          );
+        } else {
+          return Container();
+        }
+      },
     );
   }
 }
 
 class DisplayGroups extends StatelessWidget {
-  final String groupName, lastChat, time;
+  final String username, lastChat, time;
   final int chatCount;
   final Function onTap;
-  final dynamic timestamp;
 
   const DisplayGroups(
       {Key key,
-      this.groupName,
+      this.username,
       this.lastChat,
       this.time,
-      this.chatCount,
-      this.onTap,
-      this.timestamp})
+      this.chatCount = 0,
+      this.onTap})
       : super(key: key);
 
   @override
@@ -242,11 +154,7 @@ class DisplayGroups extends StatelessWidget {
           children: [
             CircleAvatar(
               backgroundColor: Colors.white,
-              child: Image.asset(
-                'images/gla.png',
-                height: 85.0,
-                width: 50.0,
-              ),
+              child: Icon(Icons.person),
             ),
             SizedBox(
               width: 3,
@@ -257,7 +165,7 @@ class DisplayGroups extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    groupName,
+                    username ?? "",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 20.0,
@@ -268,7 +176,7 @@ class DisplayGroups extends StatelessWidget {
                   ),
                   Expanded(
                       child: Text(
-                    lastChat,
+                    lastChat ?? "",
                     style: TextStyle(),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
@@ -285,7 +193,7 @@ class DisplayGroups extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    time,
+                    time ?? "",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 10.0,
@@ -300,7 +208,7 @@ class DisplayGroups extends StatelessWidget {
                           backgroundColor: Colors.orange,
                           child: Center(
                             child: Text(
-                              "$chatCount",
+                              "$chatCount" ?? "",
                               style:
                                   TextStyle(color: Colors.white, fontSize: 11),
                             ),

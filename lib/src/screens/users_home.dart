@@ -152,21 +152,21 @@ class _UsersHomeState extends State<UsersHome> {
                   icon: Icons.info,
                   title: 'About Us',
                   onTap: () {
-                    Navigator.of(context).pushNamed('/addMeter');
+                    Navigator.of(context).pushNamed('/about');
                   },
                 ),
                 HomeCard(
                   icon: Icons.contact_mail,
                   title: 'Contact Us',
                   onTap: () {
-                    Navigator.of(context).pushNamed('/dtAreas');
+                    Navigator.of(context).pushNamed('/contact');
                   },
                 ),
                 HomeCard(
                   icon: Icons.medical_services,
                   title: 'Services',
                   onTap: () {
-                    Navigator.of(context).pushNamed('/search');
+                    Navigator.of(context).pushNamed('/services');
                   },
                 ),
               ],

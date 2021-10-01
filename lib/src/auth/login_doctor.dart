@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:medcare/src/doctor/doctor_home.dart';
+import 'package:medcare/src/screens/users_home.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 
 import '../Widget/bezierContainer.dart';
@@ -103,7 +103,6 @@ class _LoginDoctorState extends State<LoginDoctor> {
                 });
               }
             });
-
           });
         } else {
           Fluttertoast.showToast(
