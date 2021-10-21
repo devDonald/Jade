@@ -5,13 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:medcare/src/Widget/buttons.dart';
 import 'package:medcare/src/helpers/auth_service.dart';
+import 'package:medcare/src/screens/appointment_doctors.dart';
 import 'package:medcare/src/screens/jade_chat.dart';
 
 final root = FirebaseFirestore.instance;
 final usersRef = root.collection('users');
 final doctorRef = root.collection('doctors');
-final chatFeedRef = root.collection('chatRef');
+final feedRef = root.collection('feeds');
 final chatRef = root.collection('chats');
+String profilePic =
+    'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6TaCLCqU4K0ieF27ayjl51NmitWaJAh_X0r1rLX4gMvOe0MDaYw&s';
 
 final timestamp = DateTime.now().toUtc();
 
@@ -22,10 +25,10 @@ class UsersHome extends StatefulWidget {
 
 class _UsersHomeState extends State<UsersHome> {
   String _uid, _name;
+  bool chatWithDoctor = false;
   void checkInGroup() async {
     // final prefs = await SharedPreferences.getInstance();
-    //  = prefs.getString('uid');
-    print('uid $_uid');
+    // chatWithBot = prefs.getBool('withChat');
     try {
       User _currentUser = FirebaseAuth.instance.currentUser;
       String authid = _currentUser.uid;
@@ -38,6 +41,14 @@ class _UsersHomeState extends State<UsersHome> {
               _name = ds.data()['name'];
             });
           }
+        }
+      });
+
+      root.collection('users').doc(authid).collection('chats').get().then((ds) {
+        if (mounted) {
+          setState(() {
+            chatWithDoctor = ds.docs.isNotEmpty;
+          });
         }
       });
     } catch (e) {
@@ -115,8 +126,22 @@ class _UsersHomeState extends State<UsersHome> {
               );
             },
           ),
+          SizedBox(height: 20.5),
 
-          ///
+          //Appointment chat
+          chatWithDoctor == false
+              ? ButtonWithIcon2(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => AppointmentDoctors(
+                          userId: _uid,
+                        ),
+                      ),
+                    );
+                  },
+                )
+              : new Container(),
 
           SizedBox(height: 20.5),
         ],
@@ -142,8 +167,9 @@ class _UsersHomeState extends State<UsersHome> {
         titleSpacing: 10.0,
       ),
       body: Container(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
+        child: ListView(
+          physics: BouncingScrollPhysics(),
+          shrinkWrap: true,
           children: [
             buildIsNotInYearBook(),
             Row(
@@ -197,6 +223,20 @@ class _UsersHomeState extends State<UsersHome> {
                     });
                   },
                 ),
+              ],
+            ),
+            Row(
+              children: [
+                chatWithDoctor
+                    ? HomeCard(
+                        icon: Icons.history,
+                        title: 'Appointment History',
+                        onTap: () {
+                          Navigator.of(context)
+                              .pushNamed('/appointmentHistory');
+                        },
+                      )
+                    : Container(),
               ],
             ),
           ],

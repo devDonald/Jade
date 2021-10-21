@@ -82,8 +82,7 @@ class _ViewAttachedImageState extends State<ViewAttachedImage> {
                       color: Colors.black.withOpacity(0.15),
                       child: Text(
                         widget.text ?? '',
-                        style: TextStyle(
-                            color: Colors.white, fontSize: 15.0),
+                        style: TextStyle(color: Colors.white, fontSize: 15.0),
                       ),
                     ),
                   )

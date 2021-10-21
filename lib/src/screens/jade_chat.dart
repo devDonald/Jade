@@ -35,7 +35,7 @@ class JadeChatState extends State<JadeChat> {
 
     dynamic conversationObject = {
       'appId': APP_ID,
-      'isSingleConversation': true,
+      'isSingleConversation': false,
       'kmUser': jsonEncode(kmUser)
     };
 
@@ -142,6 +142,7 @@ class JadeChatState extends State<JadeChat> {
                   padding: EdgeInsets.all(10),
                   child: TextField(
                     controller: emailController,
+                    keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
                       focusedBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Color(0xff5c5aa7)),
@@ -160,6 +161,7 @@ class JadeChatState extends State<JadeChat> {
                   padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
                   child: TextField(
                     controller: nameController,
+                    textCapitalization: TextCapitalization.words,
                     decoration: InputDecoration(
                       focusedBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Color(0xff5c5aa7)),

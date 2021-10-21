@@ -6,7 +6,7 @@ class MessageField {
 }
 
 class Message {
-  final String senderId, chatType, groupId, date, groupName;
+  final String senderId, chatType, receiverId, date, receiverName;
   final String photo;
   final String userName, time;
   final String messageContent, messageId;
@@ -17,9 +17,9 @@ class Message {
   const Message({
     this.senderId,
     this.chatType,
-    this.groupId,
+    this.receiverId,
     this.date,
-    this.groupName,
+    this.receiverName,
     this.photo,
     this.userName,
     this.time,
@@ -37,9 +37,9 @@ class Message {
   static Message fromJson(Map<String, dynamic> json) => Message(
         senderId: json['senderId'],
         chatType: json['chatType'],
-        groupId: json['groupId'],
+        receiverId: json['receiverId'],
         date: json['date'],
-        groupName: json['groupName'],
+        receiverName: json['receiverName'],
         time: json['time'],
         isPhoto: json['isPhoto'],
         isPinned: json['isPinned'],
@@ -61,11 +61,11 @@ class Message {
         'photo': photo,
         'chatType': chatType,
         'date': date,
-        'groupName': groupName,
+        'receiverName': receiverName,
         'time': time,
         'isPhoto': isPhoto,
         'isPinned': isPinned,
-        'groupId': groupId,
+        'receiverId': receiverId,
         'isRecorded': isRecorded,
         'seen': seen,
         'visible': visible,

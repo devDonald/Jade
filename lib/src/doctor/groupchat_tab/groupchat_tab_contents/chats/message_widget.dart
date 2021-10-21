@@ -1,9 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:medcare/src/doctor/chats/reply_message_widget.dart';
+import 'package:flutter_autolink_text/flutter_autolink_text.dart';
+import 'package:medcare/src/doctor/groupchat_tab/groupchat_tab_contents/chats/profile_picture.dart';
+import 'package:medcare/src/doctor/groupchat_tab/groupchat_tab_contents/chats/reply_message_widget.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-import '../doctor_home.dart';
+import '../../../doctor_home.dart';
 import 'attached_image_screen.dart';
 import 'message.dart';
 
@@ -31,7 +34,7 @@ class MessageWidget extends StatelessWidget {
       messageContent: message.messageContent,
       isPhoto: message.isPhoto,
       chatId: message.messageId,
-      groupId: message.groupId,
+      groupId: message.receiverId,
     );
     final messageReceiver = ReceiverChatBox(
       senderName: message.userName,
@@ -129,7 +132,7 @@ class SenderChatBox extends StatelessWidget {
                     '$timeOfMessage',
                     style: TextStyle(
                       fontSize: 9.0,
-                      color: Colors.black26,
+                      color: Colors.grey,
                     ),
                   ),
                   PopupMenuButton(
@@ -142,12 +145,12 @@ class SenderChatBox extends StatelessWidget {
                               Icon(
                                 Icons.delete,
                                 size: 17,
-                                color: Colors.orange,
+                                color: Colors.black26,
                               ),
                               SizedBox(width: 8),
                               GestureDetector(
                                 onTap: () async {
-                                  groupChatRef
+                                  chatRef
                                       .doc(groupId)
                                       .collection('chats')
                                       .doc(chatId)
@@ -158,7 +161,7 @@ class SenderChatBox extends StatelessWidget {
                                 child: Text(
                                   "Delete",
                                   style: TextStyle(
-                                    color: Colors.red,
+                                    color: Colors.black26,
                                     fontSize: 17,
                                   ),
                                 ),
@@ -173,7 +176,7 @@ class SenderChatBox extends StatelessWidget {
                     icon: Icon(
                       Icons.more_horiz,
                       size: 20,
-                      color: Colors.orange,
+                      color: Colors.grey,
                     ),
                   ),
                 ],
@@ -221,13 +224,17 @@ class SenderChatBox extends StatelessWidget {
                             .showSnackBar(SnackBar(content: Text("copied")));
                       });
                     },
-                    child: Text(
-                      '$messageContent',
-                      style: TextStyle(
-                          fontSize: 15.0,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black),
-                    ),
+                    child: AutolinkText(
+                        text: '$messageContent',
+                        humanize: true,
+                        textStyle: TextStyle(
+                            fontSize: 15.0,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black),
+                        linkStyle: TextStyle(color: Colors.blue),
+                        onWebLinkTap: (link) => launch(link),
+                        onEmailTap: (link) => launch('mailto:$link'),
+                        onPhoneTap: (link) => launch('tel:$link')),
                   ),
                 ),
           //     : Text(
@@ -282,7 +289,7 @@ class ReceiverChatBox extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black26,
+            color: Colors.grey,
             blurRadius: 7.5,
             offset: Offset(0.0, 2.5),
           ),
@@ -296,6 +303,24 @@ class ReceiverChatBox extends StatelessWidget {
             children: <Widget>[
               Row(
                 children: <Widget>[
+                  GestureDetector(
+                    onTap: () {
+                      // Navigator.push(
+                      //     context,
+                      //     MaterialPageRoute(
+                      //         builder: (context) => FollowUserProfileScreen(
+                      //               userId: senderId,
+                      //             )));
+                    },
+                    child: ProfilePicture(
+                      image: CachedNetworkImageProvider(
+                        '$senderPhoto',
+                      ),
+                      width: 30.0,
+                      height: 29.5,
+                    ),
+                  ),
+                  SizedBox(width: 10.0),
                   Text(
                     '$senderName',
                     style: TextStyle(
@@ -313,7 +338,7 @@ class ReceiverChatBox extends StatelessWidget {
                     '$timeOfMessage',
                     style: TextStyle(
                       fontSize: 9.0,
-                      color: Colors.grey,
+                      color: Colors.black26,
                     ),
                   ),
                 ],
@@ -361,13 +386,17 @@ class ReceiverChatBox extends StatelessWidget {
                             .showSnackBar(SnackBar(content: Text("copied")));
                       });
                     },
-                    child: Text(
-                      '$messageContent',
-                      style: TextStyle(
-                          fontSize: 15.0,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black),
-                    ),
+                    child: AutolinkText(
+                        text: '$messageContent',
+                        humanize: true,
+                        textStyle: TextStyle(
+                            fontSize: 15.0,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black),
+                        linkStyle: TextStyle(color: Colors.blue),
+                        onWebLinkTap: (link) => launch(link),
+                        onEmailTap: (link) => launch('mailto:$link'),
+                        onPhoneTap: (link) => launch('tel:$link')),
                   ),
                 ),
         ],

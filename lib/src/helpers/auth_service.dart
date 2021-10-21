@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:medcare/src/doctor/doctor_model.dart';
 import 'package:medcare/src/helpers/user_model.dart';
 
 class AuthService extends ChangeNotifier {
@@ -22,6 +23,15 @@ class AuthService extends ChangeNotifier {
     }
   }
 
+  DoctorModel _doctorFromFirebaseUser(User user) {
+    if (user != null) {
+      userId = user.uid;
+      return DoctorModel(doctorId: user.uid, email: user.email);
+    } else {
+      return null;
+    }
+  }
+
   Future<void> addUser(UserModel user) {
     return _db.collection('users').doc(user.userId).set(user.toJson());
   }
@@ -34,22 +44,33 @@ class AuthService extends ChangeNotifier {
         .then((snapshot) => UserModel.fromSnapshot(snapshot));
   }
 
-  Future signIn(String email, String password) async {
+  Future<User> signIn(String email, String password) async {
     try {
       final result = await _auth.signInWithEmailAndPassword(
           email: email, password: password);
       User user = result.user;
+      //await _populateCurrentUser(result.user);
+      _userFromFirebaseUser(user);
+      return user;
+    } catch (e) {
       Fluttertoast.showToast(
-          msg: "Login successful",
+          msg: "Login Failed",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.CENTER,
           timeInSecForIosWeb: 1,
-          backgroundColor: Colors.blue,
+          backgroundColor: Colors.red,
           textColor: Colors.white,
           fontSize: 16.0);
-      //await _populateCurrentUser(result.user);
+      return null;
+    }
+  }
 
-      return _userFromFirebaseUser(user);
+  Future signDoctor(String email, String password) async {
+    try {
+      final result = await _auth.signInWithEmailAndPassword(
+          email: email, password: password);
+      User user = result.user;
+      return _doctorFromFirebaseUser(user);
     } catch (e) {
       Fluttertoast.showToast(
           msg: "Login Failed",
@@ -65,7 +86,7 @@ class AuthService extends ChangeNotifier {
 
   //Sign in with google
 
-  Future createAccount(
+  Future<User> createAccount(
       String email, String password, UserModel userModel) async {
     try {
       var result = await _auth.createUserWithEmailAndPassword(
@@ -77,8 +98,8 @@ class AuthService extends ChangeNotifier {
       userModel.userId = user.uid;
 
       usersRef.doc(user.uid).set(userModel.toJson());
-
-      return _userFromFirebaseUser(user);
+      _userFromFirebaseUser(user);
+      return user;
     } catch (e) {
       return null;
     }

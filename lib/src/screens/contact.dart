@@ -88,7 +88,7 @@ class Contact extends StatelessWidget {
               style: TextStyle(color: Colors.black, fontSize: 18.0),
             ),
             Text(
-              "https://www.medcare.dcn.com.ng",
+              "https://www.jademedcare.com.ng",
               style: TextStyle(
                   color: Colors.black,
                   fontSize: 18.0,

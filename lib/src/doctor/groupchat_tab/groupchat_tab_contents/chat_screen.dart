@@ -1,15 +1,21 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:medcare/src/doctor/doctor_home.dart';
+import 'package:medcare/src/screens/users_home.dart';
 
+import 'chats/doctor_messages_widget.dart';
 import 'chats/message.dart';
 import 'chats/messages_widget.dart';
 import 'chats/new_message_widget.dart';
 
 class ChatScreen extends StatefulWidget {
-  ChatScreen({this.username, this.chatId, this.userId, this.receiverId, this.receiverName});
-  final String username, chatId, userId, receiverId, receiverName;
+  ChatScreen({
+    this.personName,
+    this.toUid,
+    this.photo,
+    this.fromUid,
+    this.isDoctor,
+  });
+  final String personName, toUid, fromUid, photo;
+  final bool isDoctor;
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
@@ -24,8 +30,8 @@ class _ChatScreenState extends State<ChatScreen> {
   Message replyMessage;
 
   void updateNotificationCount() async {
-    await chatFeedRef
-        .doc("${widget.userId}")
+    await feedRef
+        .doc(widget.fromUid)
         .collection('chats')
         .where('seen', isEqualTo: false)
         .get()
@@ -62,26 +68,17 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       // backgroundColor: kBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.black26,
         titleSpacing: -8,
-        title: Row(
-          children: <Widget>[
-            SizedBox(width: 5.0),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  widget.username ?? 'User',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15.0,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ],
+        title: Text(
+          widget.personName,
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 15.0,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
         actions: <Widget>[
           PopupMenuButton<String>(
@@ -113,22 +110,33 @@ class _ChatScreenState extends State<ChatScreen> {
                     topRight: Radius.circular(25),
                   ),
                 ),
-                child: MessagesWidget(
-                  groupId: widget.chatId,
-                  onSwipedMessage: (message) {
-                    replyToMessage(message);
-                    focusNode.requestFocus();
-                  },
-                ),
+                child: widget.isDoctor
+                    ? DoctorMessagesWidget(
+                        toUid: widget.toUid,
+                        fromUid: widget.fromUid,
+                        onSwipedMessage: (message) {
+                          replyToMessage(message);
+                          focusNode.requestFocus();
+                        },
+                      )
+                    : MessagesWidget(
+                        toUid: widget.toUid,
+                        fromUid: widget.fromUid,
+                        onSwipedMessage: (message) {
+                          replyToMessage(message);
+                          focusNode.requestFocus();
+                        },
+                      ),
               ),
             ),
-            // NewMessageWidget(
-            //   username: widget.username,
-            //   focusNode: focusNode,
-            //   chatId: widget.chatId,
-            //   onCancelReply: cancelReply,
-            //   replyMessage: replyMessage,
-            // )
+            NewMessageWidget(
+              personName: widget.personName,
+              focusNode: focusNode,
+              toUid: widget.toUid,
+              onCancelReply: cancelReply,
+              replyMessage: replyMessage,
+              isDoctor: widget.isDoctor,
+            )
           ],
         ),
       ),
@@ -144,9 +152,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> choiceAction(String choice) async {
     if (choice == GroupChatMenu.exitGroup) {
-        Navigator.of(context).pop();
-      }
+      Navigator.of(context).pop();
     }
+  }
 }
 
 class GroupChatMenu {

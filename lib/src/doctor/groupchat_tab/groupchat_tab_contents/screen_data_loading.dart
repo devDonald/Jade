@@ -25,7 +25,7 @@ class ScreenLoading extends StatelessWidget {
         Text(
           'Loading Please Wait',
           style: TextStyle(
-            color: Colors.black26,
+            color: Colors.grey,
             fontSize: 13,
           ),
         ),

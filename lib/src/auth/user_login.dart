@@ -110,7 +110,7 @@ class _UserLoginState extends State<UserLogin> {
           _pr.show();
           await state.signIn(_email.text, _password.text).then((status) {
             _pr.hide();
-            if (status != '') {
+            if (status.emailVerified) {
               Fluttertoast.showToast(
                   msg: "User Login Successful",
                   toastLength: Toast.LENGTH_LONG,
@@ -121,8 +121,9 @@ class _UserLoginState extends State<UserLogin> {
                   fontSize: 16.0);
               Navigator.pushNamedAndRemoveUntil(context, '/home', (r) => false);
             } else {
+              status.sendEmailVerification();
               Fluttertoast.showToast(
-                  msg: "Login Failed, try again",
+                  msg: "Login Failed, please verify your email",
                   toastLength: Toast.LENGTH_LONG,
                   gravity: ToastGravity.CENTER,
                   timeInSecForIosWeb: 1,

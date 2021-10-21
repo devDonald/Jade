@@ -75,9 +75,11 @@ class _LoginDoctorState extends State<LoginDoctor> {
         var state = AuthService();
         if (_email.text != '' && _password.text != '') {
           _pr.show();
-          await state.signIn(_email.text, _password.text).then((status) async {
+          await state
+              .signDoctor(_email.text, _password.text)
+              .then((status) async {
             _pr.hide();
-            await doctorRef.doc(status.uid).get().then((value) async {
+            await doctorRef.doc(status.doctorId).get().then((value) async {
               if (value.exists) {
                 Fluttertoast.showToast(
                     msg: "Doctor Login Successful",

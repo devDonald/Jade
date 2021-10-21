@@ -7,7 +7,7 @@ import 'package:medcare/src/helpers/auth_service.dart';
 
 final root = FirebaseFirestore.instance;
 final chatFeedRef = root.collection('chatRef');
-final groupChatRef = root.collection('chats');
+final chatRef = root.collection('chats');
 
 final timestamp = DateTime.now().toUtc();
 

@@ -3,6 +3,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:medcare/src/helpers/auth_service.dart';
 import 'package:medcare/src/helpers/user_model.dart';
+import 'package:medcare/src/screens/users_home.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 
 import '../Widget/bezierContainer.dart';
@@ -78,14 +79,33 @@ class _SignUpPageState extends State<SignUpPage> {
             gender: _gender.text,
             phone: _phoneNumber.text,
             isDoctor: false,
-            photo: '',
+            photo: profilePic,
           );
           state.createAccount(_email.text, _password.text, user).then((status) {
             _pr.hide();
-            if (status != '') {
-              Navigator.pushNamedAndRemoveUntil(context, '/home', (r) => false);
+            if (!status.emailVerified) {
+              status.sendEmailVerification();
+              Fluttertoast.showToast(
+                  msg:
+                      "Please verify your account through the link sent to your email",
+                  toastLength: Toast.LENGTH_LONG,
+                  gravity: ToastGravity.CENTER,
+                  timeInSecForIosWeb: 1,
+                  backgroundColor: Colors.blue,
+                  textColor: Colors.white,
+                  fontSize: 16.0);
+              Navigator.pushNamedAndRemoveUntil(
+                  context, '/login1', (r) => false);
             } else {
               //showErrorToast('Agent Registration failed, pls try again');
+              Fluttertoast.showToast(
+                  msg: "Something went wrong, please try again",
+                  toastLength: Toast.LENGTH_LONG,
+                  gravity: ToastGravity.CENTER,
+                  timeInSecForIosWeb: 1,
+                  backgroundColor: Colors.red,
+                  textColor: Colors.white,
+                  fontSize: 16.0);
             }
           });
         } else {
