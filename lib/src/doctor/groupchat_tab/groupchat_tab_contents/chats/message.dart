@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:medcare/src/helpers/utils.dart';
 
 class MessageField {
@@ -35,6 +36,27 @@ class Message {
   });
 
   static Message fromJson(Map<String, dynamic> json) => Message(
+        senderId: json['senderId'],
+        chatType: json['chatType'],
+        receiverId: json['receiverId'],
+        date: json['date'],
+        receiverName: json['receiverName'],
+        time: json['time'],
+        isPhoto: json['isPhoto'],
+        isPinned: json['isPinned'],
+        isRecorded: json['isRecorded'],
+        seen: json['seen'],
+        visible: json['visible'],
+        messageId: json['messageId'],
+        photo: json['photo'],
+        userName: json['userName'],
+        messageContent: json['messageContent'],
+        timestamp: Utils.toDateTime(json['timestamp']),
+        replyMessage: json['replyMessage'] == null
+            ? null
+            : Message.fromJson(json['replyMessage']),
+      );
+  static Message fromSnapshot(DocumentSnapshot json) => Message(
         senderId: json['senderId'],
         chatType: json['chatType'],
         receiverId: json['receiverId'],

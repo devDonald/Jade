@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:medcare/src/doctor/groupchat_tab/groupchat_tab_contents/chats/message.dart';
-import 'package:medcare/src/helpers/utils.dart';
 import 'package:medcare/src/screens/users_home.dart';
 
 class FirebaseApi {
@@ -9,7 +8,6 @@ class FirebaseApi {
       String senderPhoto,
       String toUsername,
       String messageContent,
-      Message replyMessage,
       String toUid,
       String fromUid,
       String senderName) async {
@@ -39,7 +37,6 @@ class FirebaseApi {
       userName: senderName,
       messageContent: messageContent,
       timestamp: DateTime.now().toUtc(),
-      replyMessage: replyMessage,
     );
     await _docRef.set(newMessage.toJson()).then((value) async {
       doctorRef
@@ -59,6 +56,14 @@ class FirebaseApi {
         'receiverId': toUid,
         'receiverName': toUsername,
       });
+      await doctorRef.doc(toUid).collection('chats').doc(fromUid).update({
+        'username': senderName,
+        'photo': senderPhoto,
+        'latestChat': messageContent,
+        'timestamp': timestamp,
+        'date': formatted,
+        'time': "${new DateFormat.jm().format(new DateTime.now())}",
+      });
     });
   }
 
@@ -66,7 +71,6 @@ class FirebaseApi {
       String senderPhoto,
       String toUsername,
       String messageContent,
-      Message replyMessage,
       String toUid,
       String fromUid,
       String senderName) async {
@@ -96,7 +100,6 @@ class FirebaseApi {
       userName: senderName,
       messageContent: messageContent,
       timestamp: DateTime.now().toUtc(),
-      replyMessage: replyMessage,
     );
     await _docRef.set(newMessage.toJson()).then((value) async {
       usersRef
@@ -118,24 +121,4 @@ class FirebaseApi {
       });
     });
   }
-
-  static Stream<List<Message>> userGetMessages(String userId, doctorId) =>
-      usersRef
-          .doc(userId)
-          .collection('chats')
-          .doc(doctorId)
-          .collection('chat')
-          .orderBy(MessageField.timestamp, descending: false)
-          .snapshots()
-          .transform(Utils.transformer(Message.fromJson));
-
-  static Stream<List<Message>> doctorGetMessages(String doctorId, userId) =>
-      doctorRef
-          .doc(doctorId)
-          .collection('chats')
-          .doc(userId)
-          .collection('chat')
-          .orderBy(MessageField.timestamp, descending: false)
-          .snapshots()
-          .transform(Utils.transformer(Message.fromJson));
 }

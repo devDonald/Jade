@@ -21,7 +21,7 @@ class _DoctorHomeState extends State<DoctorHome> {
   void checkInGroup() async {
     // final prefs = await SharedPreferences.getInstance();
     //  = prefs.getString('uid');
-    print('uid $_uid');
+    //print('uid $_uid');
     try {
       User _currentUser = FirebaseAuth.instance.currentUser;
       String authid = _currentUser.uid;
@@ -30,7 +30,7 @@ class _DoctorHomeState extends State<DoctorHome> {
         if (ds.exists) {
           if (mounted) {
             setState(() {
-              _uid = ds.data()['doctorId'];
+              _uid = authid;
               _name = ds.data()['name'];
             });
           }

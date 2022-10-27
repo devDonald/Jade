@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:medcare/src/Widget/user_search_tile.dart';
 import 'package:medcare/src/doctor/doctor_model.dart';
 import 'package:medcare/src/doctor/groupchat_tab/groupchat_tab_contents/chat_screen.dart';
@@ -7,10 +9,8 @@ import 'package:paginate_firestore/bloc/pagination_listeners.dart';
 import 'package:paginate_firestore/paginate_firestore.dart';
 
 class AppointmentDoctors extends StatefulWidget {
-  final String userId;
   const AppointmentDoctors({
     Key key,
-    this.userId,
   }) : super(key: key);
 
   @override
@@ -22,9 +22,25 @@ class _AppointmentDoctorsState extends State<AppointmentDoctors> {
       PaginateRefreshedChangeListener();
 
   String filter = '';
+  String _currentUserName, _currentUserId, _currentUserImage;
+
+  void fetchDetails() async {
+    User _currentUser = await FirebaseAuth.instance.currentUser;
+    String authid = _currentUser.uid;
+    usersRef.doc(authid).get().then((ds) {
+      if (ds.exists) {
+        setState(() {
+          _currentUserName = ds.data()['name'];
+          _currentUserId = ds.data()['userId'];
+          _currentUserImage = ds.data()['photo'];
+        });
+      }
+    });
+  }
 
   @override
   initState() {
+    fetchDetails();
     super.initState();
   }
 
@@ -72,7 +88,24 @@ class _AppointmentDoctorsState extends State<AppointmentDoctors> {
                   state: "${_users.state} State",
                   profileImage: _users.photo,
                   onTap: () {},
-                  onChat: () {
+                  onChat: () async {
+                    final DateTime now = DateTime.now();
+                    final DateFormat formatter = DateFormat('yyyy-MM-dd');
+                    final String formatted = formatter.format(now);
+                    await doctorRef
+                        .doc(_users.doctorId)
+                        .collection('chats')
+                        .doc(_currentUserId)
+                        .update({
+                      'username': _currentUserName,
+                      'userId': _currentUserId,
+                      'photo': _currentUserImage,
+                      'latestChat': 'new appointment',
+                      'timestamp': timestamp,
+                      'date': formatted,
+                      'time':
+                          "${new DateFormat.jm().format(new DateTime.now())}",
+                    });
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -80,8 +113,7 @@ class _AppointmentDoctorsState extends State<AppointmentDoctors> {
                           personName: "${_users.title} ${_users.name}",
                           photo: _users.photo,
                           toUid: _users.doctorId,
-                          fromUid: widget.userId,
-                          isDoctor: false,
+                          fromUid: _currentUserId,
                         ),
                         //follow user if not owner
                       ),

@@ -7,6 +7,7 @@ import 'package:medcare/src/Widget/buttons.dart';
 import 'package:medcare/src/helpers/auth_service.dart';
 import 'package:medcare/src/screens/appointment_doctors.dart';
 import 'package:medcare/src/screens/jade_chat.dart';
+import 'package:medcare/src/screens/user_profile.dart';
 
 final root = FirebaseFirestore.instance;
 final usersRef = root.collection('users');
@@ -37,7 +38,6 @@ class _UsersHomeState extends State<UsersHome> {
         if (ds.exists) {
           if (mounted) {
             setState(() {
-              _uid = ds.data()['userId'];
               _name = ds.data()['name'];
             });
           }
@@ -108,7 +108,7 @@ class _UsersHomeState extends State<UsersHome> {
           ),
           Container(
             child: Text(
-              'Your online medical assistance \n you can feel feel to chat with me \n if you need any assistance',
+              'Your online medical assistance \n you can feel to chat with me \n if you need any assistance',
               style: TextStyle(fontSize: 17.0),
               textAlign: TextAlign.center,
               maxLines: 4,
@@ -134,9 +134,7 @@ class _UsersHomeState extends State<UsersHome> {
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => AppointmentDoctors(
-                          userId: _uid,
-                        ),
+                        builder: (context) => AppointmentDoctors(),
                       ),
                     );
                   },
@@ -203,7 +201,13 @@ class _UsersHomeState extends State<UsersHome> {
                   icon: Icons.person,
                   title: 'My Profile',
                   onTap: () {
-                    Navigator.of(context).pushNamed('/searchLatLong');
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => ProfilePage(
+                          uid: _uid,
+                        ),
+                      ),
+                    );
                   },
                 ),
                 HomeCard(

@@ -1,15 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:medcare/src/doctor/groupchat_tab/groupchat_tab_contents/chats/profile_picture.dart';
 import 'package:medcare/src/helpers/firebase_api.dart';
 import 'package:medcare/src/screens/users_home.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:sticky_grouped_list/sticky_grouped_list.dart';
 
-import 'chats/profile_picture.dart';
-
-class ChatScreen extends StatefulWidget {
-  ChatScreen({
+class DoctorChatScreen extends StatefulWidget {
+  DoctorChatScreen({
     this.personName,
     this.toUid,
     this.photo,
@@ -18,10 +17,10 @@ class ChatScreen extends StatefulWidget {
   final String personName, toUid, fromUid, photo;
 
   @override
-  _ChatScreenState createState() => _ChatScreenState();
+  _DoctorChatScreenState createState() => _DoctorChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _DoctorChatScreenState extends State<DoctorChatScreen> {
   FocusNode focusNode;
   bool isTyping = false;
   final _controller = TextEditingController();
@@ -31,11 +30,11 @@ class _ChatScreenState extends State<ChatScreen> {
   void fetchDetails() async {
     User _currentUser = await FirebaseAuth.instance.currentUser;
     String authid = _currentUser.uid;
-    usersRef.doc(authid).get().then((ds) {
+    doctorRef.doc(authid).get().then((ds) {
       if (ds.exists) {
         setState(() {
           _currentUserName = ds.data()['name'];
-          _currentUserId = ds.data()['userId'];
+          _currentUserId = ds.data()['doctorId'];
           _currentUserImage = ds.data()['photo'];
         });
       }
@@ -45,8 +44,13 @@ class _ChatScreenState extends State<ChatScreen> {
   void sendMessage() async {
     FocusScope.of(context).unfocus();
     try {
-      await FirebaseApi.uploadMessage(_currentUserImage, widget.personName,
-          message, widget.toUid, widget.fromUid, _currentUserName);
+      await FirebaseApi.uploadMessageFromDoctor(
+          _currentUserImage,
+          widget.personName,
+          message,
+          widget.toUid,
+          _currentUserId,
+          _currentUserName);
     } catch (e) {
       Scaffold.of(context).showSnackBar(
         SnackBar(
@@ -250,7 +254,7 @@ class _ChatScreenState extends State<ChatScreen> {
               children: [
                 Flexible(
                   child: StreamBuilder(
-                      stream: usersRef
+                      stream: doctorRef
                           .doc(widget.fromUid)
                           .collection('chats')
                           .doc(widget.toUid)
